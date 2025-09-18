@@ -5,7 +5,7 @@ import { LoginForm } from "@/components/login-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCard, ListingCard, RequestCard, AvailableListingCard } from "@/components/dashboard-card"
-import { Plane, Package, Shield, Users, Plus } from "lucide-react"
+import { Plane, Package, Shield, Users, Plus, Search } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { mockDb } from "@/lib/mock-db"
@@ -59,10 +59,10 @@ export default function HomePage() {
               />
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4">
-              BagSwap ✈️
+              SpaceSwap ✈️
             </h1>
             <p className="text-lg sm:text-xl text-gray-600 dark:text-gray-300 mb-8">
-              Share baggage allowance, save money, help fellow travelers
+              Share baggage space, save money, help fellow travelers
             </p>
           </div>
 
@@ -104,8 +104,24 @@ export default function HomePage() {
             </Card>
           </div>
 
-          <div className="max-w-md mx-auto">
-            <LoginForm />
+          <div className="max-w-md mx-auto space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Link href="/seller">
+                <Button className="w-full h-12">
+                  <Package className="w-4 h-4 mr-2" />
+                  List Your Space
+                </Button>
+              </Link>
+              <Link href="/buyer">
+                <Button variant="outline" className="w-full h-12">
+                  <Search className="w-4 h-4 mr-2" />
+                  Find Space
+                </Button>
+              </Link>
+            </div>
+            <p className="text-center text-sm text-muted-foreground">
+              Join thousands of travelers sharing baggage space 🌍
+            </p>
           </div>
         </div>
       </div>
@@ -118,15 +134,15 @@ export default function HomePage() {
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Plane className="w-6 h-6 text-blue-600" />
-              <h1 className="text-lg font-bold">BagSwap</h1>
+          <div className="flex items-center gap-2">
+            <Plane className="w-6 h-6 text-blue-600" />
+              <h1 className="text-lg font-bold">SpaceSwap</h1>
             </div>
             <div className="flex items-center gap-2">
               <div className="hidden sm:flex items-center gap-1">
                 <Shield className="w-4 h-4 text-green-600" />
                 <span className="text-xs text-muted-foreground">Verified</span>
-              </div>
+          </div>
               <Button variant="ghost" size="sm" onClick={logout} className="text-xs">
                 Sign out
               </Button>
@@ -293,7 +309,7 @@ export default function HomePage() {
                 View all bookings & matches →
               </Link>
             </div>
-          </div>
+        </div>
         )}
       </main>
     </div>

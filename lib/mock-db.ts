@@ -17,6 +17,7 @@ export const mockDb = {
       id: Math.random().toString(36).substr(2, 9),
       ratingAvg: 0,
       createdAt: new Date(),
+      phone: userData.phone || '',
       ...userData,
     }
     users.push(user)
@@ -117,29 +118,60 @@ export const mockDb = {
   },
 
   async getAvailableListingsForUser(userId: string): Promise<Listing[]> {
-    // Mock: return some random available listings
-    return listings.filter((l) => l.sellerId !== userId && l.active)
+    // Mock: return some random available listings (not user's own)
+    const availableListings = listings.filter((l) => l.sellerId !== userId && l.active)
+    // If no listings exist, create some demo listings
+    if (availableListings.length === 0 && listings.length === 0) {
+      await this.seedDemoListings()
+      return listings.filter((l) => l.sellerId !== userId && l.active)
+    }
+    return availableListings
+  },
+
+  // Create demo listings for better UX
+  async seedDemoListings(): Promise<void> {
+    // Create demo users
+    const demoUser1 = await this.createUser({
+      email: "demo1@example.com",
+      name: "Sarah Seller",
+      phone: "+91-9876543210"
+    })
+    
+    const demoUser2 = await this.createUser({
+      email: "demo2@example.com", 
+      name: "John Traveler",
+      phone: "+91-9876543211"
+    })
+
+    // Create demo flights
+    const flight1 = await this.findOrCreateFlight("AA123", new Date("2024-12-25"), "American Airlines")
+    const flight2 = await this.findOrCreateFlight("6E2134", new Date("2024-12-26"), "IndiGo")
+    
+    // Create demo listings
+    await this.createListing({
+      sellerId: demoUser1.id,
+      flightId: flight1.id,
+      weightKg: 15,
+      pricePerKg: 2000, // ₹20.00 per kg
+      autoAccept: true,
+      active: true,
+    })
+    
+    await this.createListing({
+      sellerId: demoUser2.id,
+      flightId: flight2.id,
+      weightKg: 10,
+      pricePerKg: 1500, // ₹15.00 per kg
+      autoAccept: false,
+      active: true,
+    })
   },
 
   // Seed data for demo
   async seedData(): Promise<void> {
-    // Create demo user
-    const demoUser = await this.createUser({
-      email: "demo@example.com",
-      name: "Demo User",
-    })
-
-    // Create demo flight
-    const demoFlight = await this.findOrCreateFlight("AA123", new Date("2024-12-25"), "American Airlines")
-
-    // Create demo listing
-    await this.createListing({
-      sellerId: demoUser.id,
-      flightId: demoFlight.id,
-      weightKg: 15,
-      pricePerKg: 500, // $5.00 per kg
-      autoAccept: true,
-      active: true,
-    })
+    // Only seed if no data exists
+    if (users.length === 0) {
+      await this.seedDemoListings()
+    }
   },
 }

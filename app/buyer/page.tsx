@@ -9,13 +9,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, Search, Package, Star } from "lucide-react"
+import { ArrowLeft, Search, Package, Star, Shield } from "lucide-react"
+import { formatCurrency } from "@/lib/currency"
 import Link from "next/link"
 import { mockDb } from "@/lib/mock-db"
 import type { Flight, Listing } from "@/lib/types"
+import { UserInfoForm } from "@/components/user-info-form"
 
 export default function BuyerPage() {
-  const { user } = useAuth()
+  const { user, setUser } = useAuth()
+  const [showUserForm, setShowUserForm] = useState(!user)
   const [searchData, setSearchData] = useState({
     flightNo: "",
     flightDate: "",
@@ -24,6 +27,24 @@ export default function BuyerPage() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(false)
   const [searched, setSearched] = useState(false)
+
+  const handleUserInfoSubmit = async (userInfo: { name: string; email: string; phone: string }) => {
+    setLoading(true)
+    try {
+      // Create user in mock database
+      const newUser = await mockDb.createUser({
+        email: userInfo.email,
+        name: userInfo.name,
+        phone: userInfo.phone,
+      })
+      setUser(newUser)
+      setShowUserForm(false)
+    } catch (error) {
+      console.error("Failed to create user:", error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -55,8 +76,16 @@ export default function BuyerPage() {
     loadDemoData()
   }, [])
 
-  if (!user) {
-    return <div>Please log in to search for listings.</div>
+  // Show user info form if no user
+  if (showUserForm) {
+    return (
+      <UserInfoForm
+        title="Find Space"
+        description="Share your details to start booking baggage space"
+        onSubmit={handleUserInfoSubmit}
+        loading={loading}
+      />
+    )
   }
 
   return (
@@ -140,11 +169,18 @@ export default function BuyerPage() {
                             {listing.autoAccept && <Badge variant="secondary">Auto-accept</Badge>}
                           </div>
                           <p className="text-2xl font-bold text-green-600 mb-2">
-                            ${(listing.pricePerKg / 100).toFixed(2)} per kg
+                            {formatCurrency(listing.pricePerKg)} per kg
                           </p>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                            <span>4.8 rating • 23 reviews</span>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                              <Shield className="w-4 h-4 text-green-600" />
+                              <span>Verified</span>
+                            </div>
+                            <span>•</span>
+                            <div className="flex items-center gap-1">
+                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <span>4.8 • 23 swaps</span>
+                            </div>
                           </div>
                         </div>
                         <div className="text-right">
