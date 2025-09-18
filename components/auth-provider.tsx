@@ -23,9 +23,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check for existing session
     const checkAuth = async () => {
-      const currentUser = await mockDb.getCurrentUser()
-      setUser(currentUser)
-      setLoading(false)
+      try {
+        // First check localStorage for user session
+        const storedUser = localStorage.getItem('spaceswap_user')
+        if (storedUser) {
+          const user = JSON.parse(storedUser)
+          await mockDb.setCurrentUser(user)
+          setUser(user)
+        } else {
+          // Fallback to mockDb
+          const currentUser = await mockDb.getCurrentUser()
+          setUser(currentUser)
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        setUser(null)
+      } finally {
+        setLoading(false)
+      }
     }
     checkAuth()
   }, [])
@@ -39,6 +54,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user = await mockDb.createUser({ email, name: email.split("@")[0] })
       }
       await mockDb.setCurrentUser(user)
+      localStorage.setItem('spaceswap_user', JSON.stringify(user))
       setUser(user)
     } finally {
       setLoading(false)
@@ -47,10 +63,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     await mockDb.setCurrentUser(null)
+    localStorage.removeItem('spaceswap_user')
     setUser(null)
   }
 
-  return <AuthContext.Provider value={{ user, setUser, login, logout, loading }}>{children}</AuthContext.Provider>
+  const persistUser = (user: User | null) => {
+    if (user) {
+      localStorage.setItem('spaceswap_user', JSON.stringify(user))
+    } else {
+      localStorage.removeItem('spaceswap_user')
+    }
+    setUser(user)
+  }
+
+  return <AuthContext.Provider value={{ user, setUser: persistUser, login, logout, loading }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

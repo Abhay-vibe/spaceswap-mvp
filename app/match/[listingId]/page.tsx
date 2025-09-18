@@ -36,14 +36,20 @@ export default function MatchPage({ params }: MatchPageProps) {
         const listingData = await mockDb.getListingById(params.listingId)
         if (listingData) {
           setListing(listingData)
-          // In a real app, we'd fetch the seller data
-          setSeller({
-            id: listingData.sellerId,
-            email: "seller@example.com",
-            name: "John Seller",
-            ratingAvg: 4.8,
-            createdAt: new Date(),
-          })
+          // Fetch the actual seller data
+          const sellerData = await mockDb.getUserById(listingData.sellerId)
+          if (sellerData) {
+            setSeller(sellerData)
+          } else {
+            // Fallback if seller not found
+            setSeller({
+              id: listingData.sellerId,
+              email: "seller@example.com",
+              name: "Space Provider",
+              ratingAvg: 4.8,
+              createdAt: new Date(),
+            })
+          }
         }
       } catch (error) {
         console.error("Failed to load listing:", error)
@@ -98,17 +104,24 @@ export default function MatchPage({ params }: MatchPageProps) {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
-          <Link href="/buyer">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Search
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/buyer">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Search
+              </Button>
+            </Link>
+            <div className="flex items-center gap-2">
+              <Package className="w-6 h-6 text-blue-600" />
+              <h1 className="text-xl font-bold">Book Baggage Space</h1>
+            </div>
+          </div>
+          <Link href="/">
+            <Button variant="ghost" size="sm" className="p-2">
+              <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
-          <div className="flex items-center gap-2">
-            <Package className="w-6 h-6 text-blue-600" />
-            <h1 className="text-xl font-bold">Book Baggage Space</h1>
-          </div>
         </div>
       </header>
 

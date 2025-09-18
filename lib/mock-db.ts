@@ -30,6 +30,10 @@ export const mockDb = {
     return users.find((u) => u.email === email) || null
   },
 
+  async getUserById(id: string): Promise<User | null> {
+    return users.find((u) => u.id === id) || null
+  },
+
   async getCurrentUser(): Promise<User | null> {
     return currentUser
   },

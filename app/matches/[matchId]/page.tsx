@@ -36,15 +36,23 @@ export default function MatchDetailsPage({ params }: MatchPageProps) {
           const listingData = await mockDb.getListingById(matchData.listingId)
           setListing(listingData)
 
-          // Mock other user data
+          // Get actual other user data
           const isUserBuyer = matchData.buyerId === user?.id
-          setOtherUser({
-            id: isUserBuyer ? matchData.listingId : matchData.buyerId,
-            email: isUserBuyer ? "seller@example.com" : "buyer@example.com",
-            name: isUserBuyer ? "John Seller" : "Jane Buyer",
-            ratingAvg: 4.8,
-            createdAt: new Date(),
-          })
+          const otherUserId = isUserBuyer ? listingData?.sellerId : matchData.buyerId
+          if (otherUserId) {
+            const otherUserData = await mockDb.getUserById(otherUserId)
+            if (otherUserData) {
+              setOtherUser(otherUserData)
+            } else {
+              setOtherUser({
+                id: otherUserId,
+                email: isUserBuyer ? "seller@example.com" : "buyer@example.com",
+                name: isUserBuyer ? "Space Provider" : "Traveler",
+                ratingAvg: 4.8,
+                createdAt: new Date(),
+              })
+            }
+          }
         }
       } catch (error) {
         console.error("Failed to load match:", error)

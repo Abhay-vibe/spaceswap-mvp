@@ -40,10 +40,12 @@ export default function MatchesPage() {
               const flight = await mockDb.getFlightById(listing.flightId)
               enrichedListing = { ...listing, flight }
             }
+            // Get actual buyer data
+            const buyerData = await mockDb.getUserById(match.buyerId)
             return {
               ...match,
               listing: enrichedListing,
-              buyer: { name: "John Traveler", phone: "+91-9876543210", email: "john@example.com" }
+              buyer: buyerData || { name: "Traveler", phone: "+91-9876543210", email: "traveler@example.com" }
             }
           })
         )
@@ -59,10 +61,12 @@ export default function MatchesPage() {
               const flight = await mockDb.getFlightById(listing.flightId)
               enrichedListing = { ...listing, flight }
             }
+            // Get actual seller data
+            const sellerData = listing ? await mockDb.getUserById(listing.sellerId) : null
             return {
               ...match,
               listing: enrichedListing,
-              seller: { name: "Sarah Provider", phone: "+91-9876543211", email: "sarah@example.com" }
+              seller: sellerData || { name: "Space Provider", phone: "+91-9876543211", email: "provider@example.com" }
             }
           })
         )
@@ -138,14 +142,21 @@ export default function MatchesPage() {
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="container mx-auto px-4 py-4 flex items-center gap-4">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+            <h1 className="text-xl font-bold">My Requests & Bookings</h1>
+          </div>
           <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
+            <Button variant="ghost" size="sm" className="p-2">
+              <ArrowLeft className="w-4 h-4" />
             </Button>
           </Link>
-          <h1 className="text-xl font-bold">My Requests & Bookings</h1>
         </div>
       </header>
 
