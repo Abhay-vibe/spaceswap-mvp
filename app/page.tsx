@@ -21,14 +21,19 @@ export default function HomePage() {
 
   useEffect(() => {
     if (user) {
+      console.log('Loading dashboard data for user:', user.name || user.email)
       loadDashboardData()
     }
   }, [user])
 
   const loadDashboardData = async () => {
     try {
+      // Ensure demo data exists
+      await mockDb.seedData()
+      
       // Load user's listings with flight data
-      const userListings = await mockDb.getListingsByUser?.(user!.id) || []
+      const userListings = await mockDb.getListingsByUser(user!.id) || []
+      console.log('User listings:', userListings)
       const listingsWithFlights = await Promise.all(
         userListings.map(async (listing) => {
           const flight = await mockDb.getFlightById(listing.flightId)
@@ -38,11 +43,13 @@ export default function HomePage() {
       setListings(listingsWithFlights)
 
       // Load incoming requests (for seller)
-      const incomingRequests = await mockDb.getRequestsForUser?.(user!.id) || []
+      const incomingRequests = await mockDb.getRequestsForUser(user!.id) || []
+      console.log('Incoming requests:', incomingRequests)
       setRequests(incomingRequests)
 
       // Load available listings on user's flights (for buyer) with flight data
-      const availableListings = await mockDb.getAvailableListingsForUser?.(user!.id) || []
+      const availableListings = await mockDb.getAvailableListingsForUser(user!.id) || []
+      console.log('Available listings:', availableListings)
       const availableWithFlights = await Promise.all(
         availableListings.map(async (listing) => {
           const flight = await mockDb.getFlightById(listing.flightId)
@@ -185,6 +192,15 @@ export default function HomePage() {
             ))}
           </div>
         ) : (
+          <div className="space-y-2 mb-4 p-2 bg-blue-50 rounded text-xs">
+            <p>Debug Info:</p>
+            <p>User: {user?.name || user?.email}</p>
+            <p>Listings: {listings.length}</p>
+            <p>Requests: {requests.length}</p>
+            <p>Available: {availableOnFlights.length}</p>
+          </div>
+        )}
+        {!loading && (
           <div className="space-y-6">
             {/* Your Listings Card */}
             <DashboardCard 

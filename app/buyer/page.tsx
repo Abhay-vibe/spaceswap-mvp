@@ -71,7 +71,12 @@ export default function BuyerPage() {
   // Load demo data on mount
   useEffect(() => {
     const loadDemoData = async () => {
-      await mockDb.seedData()
+      try {
+        await mockDb.seedData()
+        console.log('Demo data seeded for buyer page')
+      } catch (error) {
+        console.error('Failed to seed demo data:', error)
+      }
     }
     loadDemoData()
   }, [])

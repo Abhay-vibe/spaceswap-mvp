@@ -76,7 +76,7 @@ export default function MatchPage({ params }: MatchPageProps) {
         buyerId: user.id,
         quantityKg: quantityNum,
         totalCents,
-        status: listing.autoAccept ? MatchStatus.PENDING : MatchStatus.PENDING,
+        status: MatchStatus.PENDING,
       })
 
       router.push(`/payment/${match.id}`)

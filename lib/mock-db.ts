@@ -187,8 +187,8 @@ export const mockDb = {
 
   // Seed data for demo
   async seedData(): Promise<void> {
-    // Only seed if no data exists
-    if (users.length === 0) {
+    // Only seed if no listings exist (not users, as users get created when people sign up)
+    if (listings.length === 0) {
       await this.seedDemoListings()
     }
   },
