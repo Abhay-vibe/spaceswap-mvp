@@ -14,9 +14,9 @@ import { MatchStatus } from "@/lib/types"
 
 export default function HomePage() {
   const { user, logout } = useAuth()
-  const [listings, setListings] = useState<Listing[]>([])
+  const [listings, setListings] = useState<(Listing & { flight?: any })[]>([])
   const [requests, setRequests] = useState<Match[]>([])
-  const [availableOnFlights, setAvailableOnFlights] = useState<Listing[]>([])
+  const [availableOnFlights, setAvailableOnFlights] = useState<(Listing & { flight?: any })[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -27,17 +27,29 @@ export default function HomePage() {
 
   const loadDashboardData = async () => {
     try {
-      // Load user's listings
+      // Load user's listings with flight data
       const userListings = await mockDb.getListingsByUser?.(user!.id) || []
-      setListings(userListings)
+      const listingsWithFlights = await Promise.all(
+        userListings.map(async (listing) => {
+          const flight = await mockDb.getFlightById(listing.flightId)
+          return { ...listing, flight }
+        })
+      )
+      setListings(listingsWithFlights)
 
       // Load incoming requests (for seller)
       const incomingRequests = await mockDb.getRequestsForUser?.(user!.id) || []
       setRequests(incomingRequests)
 
-      // Load available listings on user's flights (for buyer)
+      // Load available listings on user's flights (for buyer) with flight data
       const availableListings = await mockDb.getAvailableListingsForUser?.(user!.id) || []
-      setAvailableOnFlights(availableListings)
+      const availableWithFlights = await Promise.all(
+        availableListings.map(async (listing) => {
+          const flight = await mockDb.getFlightById(listing.flightId)
+          return { ...listing, flight }
+        })
+      )
+      setAvailableOnFlights(availableWithFlights)
     } catch (error) {
       console.error('Failed to load dashboard data:', error)
     } finally {
@@ -67,29 +79,33 @@ export default function HomePage() {
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8 sm:mb-12">
-            <Card className="shadow-sm">
-              <CardHeader className="text-center pb-3">
-                <Package className="w-10 h-10 mx-auto text-blue-600 mb-2" />
-                <CardTitle className="text-lg">Share Space 🎒</CardTitle>
+            <Link href="/seller">
+              <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                <CardHeader className="text-center pb-3">
+                  <Package className="w-10 h-10 mx-auto text-blue-600 mb-2" />
+                  <CardTitle className="text-lg">Share Space 🎒</CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                <CardDescription className="text-center text-sm">
+                <CardContent className="pt-0">
+                  <CardDescription className="text-center text-sm">
                   Got extra baggage allowance? List it and earn money helping other travelers.
                 </CardDescription>
               </CardContent>
             </Card>
+            </Link>
 
-            <Card className="shadow-sm">
-              <CardHeader className="text-center pb-3">
-                <Users className="w-10 h-10 mx-auto text-green-600 mb-2" />
-                <CardTitle className="text-lg">Find Space 🔍</CardTitle>
+            <Link href="/buyer">
+              <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                <CardHeader className="text-center pb-3">
+                  <Users className="w-10 h-10 mx-auto text-green-600 mb-2" />
+                  <CardTitle className="text-lg">Find Space 🔍</CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                <CardDescription className="text-center text-sm">
+                <CardContent className="pt-0">
+                  <CardDescription className="text-center text-sm">
                   Need extra baggage space? Find travelers on your flight willing to share.
                 </CardDescription>
               </CardContent>
             </Card>
+            </Link>
 
             <Card className="shadow-sm sm:col-span-2 lg:col-span-1">
               <CardHeader className="text-center pb-3">
@@ -98,7 +114,7 @@ export default function HomePage() {
               </CardHeader>
               <CardContent className="pt-0">
                 <CardDescription className="text-center text-sm">
-                  Payments held in escrow until confirmation. Safe and secure for everyone.
+                  No upfront payment required. Pay directly to space providers after confirmation.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -181,18 +197,28 @@ export default function HomePage() {
                   {listings.slice(0, 2).map((listing) => (
                     <ListingCard
                       key={listing.id}
-                      flight={{
-                        flightNo: "AA123", // Mock data
-                        date: new Date("2024-12-25"),
-                        airline: "American Airlines"
-                      }}
-                      weightKg={listing.weightKg}
-                      pricePerKg={listing.pricePerKg}
+                      listing={listing}
                       pendingRequests={Math.floor(Math.random() * 3)}
                       isVerified={true}
                       trustScore={4.8}
-                      onViewRequests={() => {}}
-                      onEditListing={() => {}}
+                      onViewRequests={() => {
+                        window.location.href = '/matches'
+                      }}
+                      onEditListing={() => {
+                        // Store listing data in sessionStorage for editing
+                        if (listing.flight) {
+                          sessionStorage.setItem('editListing', JSON.stringify({
+                            id: listing.id,
+                            flightNo: listing.flight.flightNo,
+                            flightDate: listing.flight.date.toISOString().split('T')[0],
+                            airline: listing.flight.airline || '',
+                            weightKg: listing.weightKg.toString(),
+                            pricePerKg: (listing.pricePerKg / 100).toString(),
+                            autoAccept: listing.autoAccept
+                          }))
+                        }
+                        window.location.href = '/seller'
+                      }}
                     />
                   ))}
                   {listings.length > 2 && (
@@ -259,18 +285,20 @@ export default function HomePage() {
                   {availableOnFlights.slice(0, 2).map((listing) => (
                     <AvailableListingCard
                       key={listing.id}
-                      flight={{
-                        flightNo: "AA123",
-                        date: new Date("2024-12-25"),
-                        airline: "American Airlines"
+                      flight={listing.flight || {
+                        flightNo: "TBD",
+                        date: new Date(),
+                        airline: "TBD"
                       }}
-                      sellerName="Sarah Seller"
+                      sellerName="Space Provider"
                       weightKg={listing.weightKg}
                       pricePerKg={listing.pricePerKg}
                       isVerified={true}
                       trustScore={4.9}
                       matchHistory={12}
-                      onBook={() => {}}
+                      onBook={() => {
+                        window.location.href = `/match/${listing.id}`
+                      }}
                     />
                   ))}
                 </div>

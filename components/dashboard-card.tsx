@@ -41,13 +41,17 @@ export function DashboardCard({ title, description, icon, children, className = 
 }
 
 interface ListingCardProps {
-  flight: {
-    flightNo: string
-    date: Date
-    airline?: string
+  listing: {
+    id: string
+    weightKg: number
+    pricePerKg: number
+    autoAccept: boolean
+    flight?: {
+      flightNo: string
+      date: Date
+      airline?: string
+    }
   }
-  weightKg: number
-  pricePerKg: number
   pendingRequests: number
   isVerified?: boolean
   trustScore?: number
@@ -56,16 +60,15 @@ interface ListingCardProps {
 }
 
 export function ListingCard({ 
-  flight, 
-  weightKg, 
-  pricePerKg, 
+  listing, 
   pendingRequests,
   isVerified = false,
   trustScore = 4.8,
   onViewRequests,
   onEditListing 
 }: ListingCardProps) {
-  const totalEarnings = weightKg * pricePerKg;
+  const totalEarnings = listing.weightKg * listing.pricePerKg;
+  const flight = listing.flight || { flightNo: 'TBD', date: new Date(), airline: 'TBD' };
 
   return (
     <Card className="shadow-sm hover:shadow-md transition-shadow">
@@ -95,11 +98,11 @@ export function ListingCard({
         <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
             <p className="text-xs text-muted-foreground">Available</p>
-            <p className="font-semibold text-sm">{weightKg} kg</p>
+            <p className="font-semibold text-sm">{listing.weightKg} kg</p>
           </div>
           <div>
             <p className="text-xs text-muted-foreground">Per kg</p>
-            <p className="font-semibold text-sm">{formatCurrency(pricePerKg)}</p>
+            <p className="font-semibold text-sm">{formatCurrency(listing.pricePerKg)}</p>
           </div>
         </div>
 

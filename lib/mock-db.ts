@@ -21,6 +21,8 @@ export const mockDb = {
       ...userData,
     }
     users.push(user)
+    // Also set as current user
+    await this.setCurrentUser(user)
     return user
   },
 
@@ -114,7 +116,7 @@ export const mockDb = {
     // Get matches where user is the seller (requests to their listings)
     const userListings = listings.filter((l) => l.sellerId === userId)
     const userListingIds = userListings.map((l) => l.id)
-    return matches.filter((m) => userListingIds.includes(m.listingId) && m.status === "PENDING")
+    return matches.filter((m) => userListingIds.includes(m.listingId))
   },
 
   async getAvailableListingsForUser(userId: string): Promise<Listing[]> {
@@ -165,6 +167,18 @@ export const mockDb = {
       autoAccept: false,
       active: true,
     })
+
+    // Create some demo matches for better UX
+    const listing1 = listings[0]
+    if (listing1) {
+      await this.createMatch({
+        listingId: listing1.id,
+        buyerId: demoUser2.id,
+        quantityKg: 5,
+        totalCents: 10000, // ₹100
+        status: MatchStatus.PENDING,
+      })
+    }
   },
 
   // Seed data for demo

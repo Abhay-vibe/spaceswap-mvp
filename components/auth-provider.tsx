@@ -8,6 +8,7 @@ import { mockDb } from "@/lib/mock-db"
 
 interface AuthContextType {
   user: User | null
+  setUser: (user: User | null) => void
   login: (email: string) => Promise<void>
   logout: () => Promise<void>
   loading: boolean
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null)
   }
 
-  return <AuthContext.Provider value={{ user, login, logout, loading }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, setUser, login, logout, loading }}>{children}</AuthContext.Provider>
 }
 
 export function useAuth() {

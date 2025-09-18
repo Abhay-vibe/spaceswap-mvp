@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useAuth } from "@/components/auth-provider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -29,6 +29,31 @@ export default function SellerPage() {
     pricePerKg: "",
     autoAccept: true,
   })
+  const [isEditing, setIsEditing] = useState(false)
+  const [editingListingId, setEditingListingId] = useState<string | null>(null)
+
+  // Check for editing data on component mount
+  useEffect(() => {
+    const editData = sessionStorage.getItem('editListing')
+    if (editData) {
+      try {
+        const listing = JSON.parse(editData)
+        setFormData({
+          flightNo: listing.flightNo,
+          flightDate: listing.flightDate,
+          airline: listing.airline,
+          weightKg: listing.weightKg,
+          pricePerKg: listing.pricePerKg,
+          autoAccept: listing.autoAccept,
+        })
+        setIsEditing(true)
+        setEditingListingId(listing.id)
+        sessionStorage.removeItem('editListing') // Clear after loading
+      } catch (error) {
+        console.error('Failed to parse edit data:', error)
+      }
+    }
+  }, [])
 
   const handleUserInfoSubmit = async (userInfo: { name: string; email: string; phone: string }) => {
     setLoading(true)
@@ -242,33 +267,37 @@ export default function SellerPage() {
       <main className="container mx-auto px-4 py-6 max-w-md">
         <Card className="shadow-sm">
           <CardHeader className="pb-4">
-            <CardTitle className="text-lg">Share Your Spare Baggage Allowance</CardTitle>
-            <CardDescription className="text-sm">Help fellow travelers while earning money 💸</CardDescription>
+            <CardTitle className="text-lg">
+              {isEditing ? 'Edit Your Listing' : 'Share Your Spare Baggage Allowance'}
+            </CardTitle>
+            <CardDescription className="text-sm">
+              {isEditing ? 'Update your baggage space details' : 'Help fellow travelers while earning money 💸'}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
+                <div className="space-y-2">
                 <Label htmlFor="flightNo" className="text-sm">Flight Number</Label>
-                <Input
-                  id="flightNo"
+                  <Input
+                    id="flightNo"
                   placeholder="AI101, 6E2134, UK955"
-                  value={formData.flightNo}
-                  onChange={(e) => handleInputChange("flightNo", e.target.value)}
-                  required
+                    value={formData.flightNo}
+                    onChange={(e) => handleInputChange("flightNo", e.target.value)}
+                    required
                   className="h-12"
-                />
-              </div>
+                  />
+                </div>
 
-              <div className="space-y-2">
+                <div className="space-y-2">
                 <Label htmlFor="flightDate" className="text-sm">Flight Date</Label>
-                <Input
-                  id="flightDate"
-                  type="date"
-                  value={formData.flightDate}
-                  onChange={(e) => handleInputChange("flightDate", e.target.value)}
-                  required
+                  <Input
+                    id="flightDate"
+                    type="date"
+                    value={formData.flightDate}
+                    onChange={(e) => handleInputChange("flightDate", e.target.value)}
+                    required
                   className="h-12"
-                />
+                  />
               </div>
 
               <div className="space-y-2">
@@ -327,7 +356,7 @@ export default function SellerPage() {
               </div>
 
               <Button type="submit" className="w-full h-12" disabled={loading}>
-                {loading ? "Creating Listing..." : "Create Listing ✈️"}
+                {loading ? (isEditing ? "Updating Listing..." : "Creating Listing...") : (isEditing ? "Update Listing ✈️" : "Create Listing ✈️")}
               </Button>
             </form>
           </CardContent>
