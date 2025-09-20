@@ -122,10 +122,19 @@ export function ConfigStatusBanner() {
                     size="sm"
                     variant="outline"
                     className="text-xs h-6"
+                    onClick={() => window.open('/SUPABASE_OAUTH_SETUP.md', '_blank')}
+                  >
+                    <ExternalLink className="h-3 w-3 mr-1" />
+                    Fix Connection
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="text-xs h-6"
                     onClick={() => window.open('/GOOGLE_OAUTH_SETUP.md', '_blank')}
                   >
                     <ExternalLink className="h-3 w-3 mr-1" />
-                    Setup Guide
+                    OAuth Setup
                   </Button>
                 </div>
               </div>
@@ -163,11 +172,11 @@ export function ConfigErrorFallback() {
           
           <div className="flex gap-2">
             <Button 
-              onClick={() => window.open('/GOOGLE_OAUTH_SETUP.md', '_blank')}
+              onClick={() => window.open('/SUPABASE_OAUTH_SETUP.md', '_blank')}
               className="flex-1"
             >
               <ExternalLink className="h-4 w-4 mr-2" />
-              View Setup Guide
+              Fix Supabase Connection
             </Button>
             <Button 
               variant="outline"

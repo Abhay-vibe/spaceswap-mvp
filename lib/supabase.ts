@@ -23,6 +23,19 @@ export const supabaseAdmin = createClient(config.supabaseUrl, config.supabaseSer
 // Export configuration status for components to check
 export const isSupabaseConfigured = config.isConfigured
 
+// Debug helper for client-side environment variable verification
+export const getClientSupabaseConfig = () => {
+  if (typeof window !== 'undefined') {
+    return {
+      url: process.env.NEXT_PUBLIC_SUPABASE_URL,
+      hasAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
+      isConfigured: config.isConfigured,
+      isPlaceholder: config.supabaseUrl.includes('placeholder') || config.supabaseUrl.includes('your-project')
+    }
+  }
+  return null
+}
+
 // Database types
 export interface User {
   id: string
