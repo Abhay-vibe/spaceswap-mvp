@@ -85,7 +85,9 @@ export default function MatchesPage() {
     try {
       await mockDb.updateMatchStatus(matchId, MatchStatus.ACCEPTED)
       // Refresh data
-      window.location.reload()
+      if (typeof window !== 'undefined') {
+        window.location.reload()
+      }
     } catch (error) {
       console.error("Failed to accept request:", error)
     }
@@ -95,7 +97,9 @@ export default function MatchesPage() {
     try {
       await mockDb.updateMatchStatus(matchId, MatchStatus.CANCELLED)
       // Refresh data
-      window.location.reload()
+      if (typeof window !== 'undefined') {
+        window.location.reload()
+      }
     } catch (error) {
       console.error("Failed to decline request:", error)
     }

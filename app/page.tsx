@@ -225,19 +225,23 @@ export default function HomePage() {
                       isVerified={true}
                       trustScore={85}
                       onViewRequests={() => {
-                        window.location.href = '/matches'
+                        if (typeof window !== 'undefined') {
+                          window.location.href = '/matches'
+                        }
                       }}
                       onEditListing={() => {
-                        sessionStorage.setItem('editListing', JSON.stringify({
-                          id: listing.id,
-                          flightNo: listing.flight?.flightNo || '',
-                          flightDate: listing.flight?.date ? new Date(listing.flight.date).toISOString().split('T')[0] : '',
-                          airline: listing.flight?.airline || '',
-                          weightKg: listing.weightKg.toString(),
-                          pricePerKg: (listing.pricePerKg / 100).toString(),
-                          autoAccept: listing.autoAccept
-                        }))
-                        window.location.href = '/seller'
+                        if (typeof window !== 'undefined') {
+                          sessionStorage.setItem('editListing', JSON.stringify({
+                            id: listing.id,
+                            flightNo: listing.flight?.flightNo || '',
+                            flightDate: listing.flight?.date ? new Date(listing.flight.date).toISOString().split('T')[0] : '',
+                            airline: listing.flight?.airline || '',
+                            weightKg: listing.weightKg.toString(),
+                            pricePerKg: (listing.pricePerKg / 100).toString(),
+                            autoAccept: listing.autoAccept
+                          }))
+                          window.location.href = '/seller'
+                        }
                       }}
                     />
                   ))}
@@ -268,7 +272,9 @@ export default function HomePage() {
                       key={request.id}
                       request={request}
                       onAccept={() => {
-                        window.location.href = `/matches/${request.id}`
+                        if (typeof window !== 'undefined') {
+                          window.location.href = `/matches/${request.id}`
+                        }
                       }}
                       onDecline={() => {
                         // Handle decline logic
@@ -293,10 +299,14 @@ export default function HomePage() {
                       key={listing.id}
                       listing={listing}
                       onBook={() => {
-                        window.location.href = `/match/${listing.id}`
+                        if (typeof window !== 'undefined') {
+                          window.location.href = `/match/${listing.id}`
+                        }
                       }}
                       onViewDetails={() => {
-                        window.location.href = `/match/${listing.id}`
+                        if (typeof window !== 'undefined') {
+                          window.location.href = `/match/${listing.id}`
+                        }
                       }}
                     />
                   ))}
