@@ -64,6 +64,7 @@ export default function HomePage() {
     }
   }
 
+  // Show login form if user is not authenticated
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
@@ -87,56 +88,60 @@ export default function HomePage() {
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-8 sm:mb-12">
             <Link href="/seller">
-              <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                <CardHeader className="text-center pb-3">
-                  <Package className="w-10 h-10 mx-auto text-blue-600 mb-2" />
-                  <CardTitle className="text-lg">Share Space 🎒</CardTitle>
-              </CardHeader>
-                <CardContent className="pt-0">
-                  <CardDescription className="text-center text-sm">
-                  Got extra baggage allowance? List it and earn money helping other travelers.
-                </CardDescription>
-              </CardContent>
-            </Card>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Package className="w-5 h-5 text-blue-600" />
+                    Share Space
+                  </CardTitle>
+                  <CardDescription>
+                    List your extra baggage allowance
+                  </CardDescription>
+                </CardHeader>
+              </Card>
             </Link>
 
             <Link href="/buyer">
-              <Card className="shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                <CardHeader className="text-center pb-3">
-                  <Users className="w-10 h-10 mx-auto text-green-600 mb-2" />
-                  <CardTitle className="text-lg">Find Space 🔍</CardTitle>
-              </CardHeader>
-                <CardContent className="pt-0">
-                  <CardDescription className="text-center text-sm">
-                  Need extra baggage space? Find travelers on your flight willing to share.
-                </CardDescription>
-              </CardContent>
-            </Card>
+              <Card className="cursor-pointer hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Search className="w-5 h-5 text-green-600" />
+                    Find Space
+                  </CardTitle>
+                  <CardDescription>
+                    Book baggage space for your items
+                  </CardDescription>
+                </CardHeader>
+              </Card>
             </Link>
 
-            <Card className="shadow-sm sm:col-span-2 lg:col-span-1">
-              <CardHeader className="text-center pb-3">
-                <Shield className="w-10 h-10 mx-auto text-purple-600 mb-2" />
-                <CardTitle className="text-lg">Secure Payment 💸</CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <CardDescription className="text-center text-sm">
-                  No upfront payment required. Pay directly to space providers after confirmation.
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Shield className="w-5 h-5 text-purple-600" />
+                  Secure Payment
+                </CardTitle>
+                <CardDescription>
+                  Pay only after confirmation - no upfront payment required
                 </CardDescription>
-              </CardContent>
+              </CardHeader>
             </Card>
           </div>
 
-          <div className="max-w-md mx-auto space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+          <div className="max-w-md mx-auto">
+            <LoginForm />
+          </div>
+
+          <div className="mt-8 sm:mt-12 text-center">
+            <div className="flex justify-center gap-4 sm:gap-8 mb-6">
               <Link href="/seller">
-                <Button className="w-full h-12">
-                  <Package className="w-4 h-4 mr-2" />
-                  List Your Space
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Share Space
                 </Button>
               </Link>
               <Link href="/buyer">
-                <Button variant="outline" className="w-full h-12">
+                <Button size="lg" variant="outline">
                   <Search className="w-4 h-4 mr-2" />
                   Find Space
                 </Button>
@@ -151,6 +156,7 @@ export default function HomePage() {
     )
   }
 
+  // Main dashboard for authenticated users
   return (
     <div className="min-h-screen bg-background">
       {/* Mobile-First Header */}
@@ -179,173 +185,148 @@ export default function HomePage() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-6 max-w-md">
+      <main className="container mx-auto px-4 py-6 max-w-4xl">
         {loading ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="animate-pulse">
-                <CardContent className="p-4">
-                  <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <CardContent className="p-6">
+                  <div className="h-4 bg-gray-200 rounded w-1/4 mb-2"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/2 mb-4"></div>
                   <div className="h-3 bg-gray-200 rounded w-2/3"></div>
                 </CardContent>
               </Card>
             ))}
           </div>
-        )}
-        {!loading && (
+        ) : (
           <div className="space-y-6">
             {/* Your Listings Card */}
             <DashboardCard 
               title="Your Listings ✈️" 
               description="Manage your baggage space offerings"
-              icon={<Package className="w-5 h-5 text-blue-600" />}
+              isEmpty={listings.length === 0}
+              emptyMessage="No listings yet"
+              emptyAction={
+                <Link href="/seller">
+                  <Button className="w-full">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create First Listing
+                  </Button>
+                </Link>
+              }
             >
-              {listings.length > 0 ? (
+              {listings.length > 0 && (
                 <div className="space-y-3">
                   {listings.slice(0, 2).map((listing) => (
                     <ListingCard
                       key={listing.id}
                       listing={listing}
-                      pendingRequests={Math.floor(Math.random() * 3)}
+                      pendingRequests={requests.filter(r => r.listingId === listing.id).length}
                       isVerified={true}
-                      trustScore={4.8}
+                      trustScore={85}
                       onViewRequests={() => {
                         window.location.href = '/matches'
                       }}
                       onEditListing={() => {
-                        // Store listing data in sessionStorage for editing
-                        if (listing.flight) {
-                          sessionStorage.setItem('editListing', JSON.stringify({
-                            id: listing.id,
-                            flightNo: listing.flight.flightNo,
-                            flightDate: listing.flight.date.toISOString().split('T')[0],
-                            airline: listing.flight.airline || '',
-                            weightKg: listing.weightKg.toString(),
-                            pricePerKg: (listing.pricePerKg / 100).toString(),
-                            autoAccept: listing.autoAccept
-                          }))
-                        }
+                        sessionStorage.setItem('editListing', JSON.stringify({
+                          id: listing.id,
+                          flightNo: listing.flight?.flightNo || '',
+                          flightDate: listing.flight?.date ? new Date(listing.flight.date).toISOString().split('T')[0] : '',
+                          airline: listing.flight?.airline || '',
+                          weightKg: listing.weightKg.toString(),
+                          pricePerKg: (listing.pricePerKg / 100).toString(),
+                          autoAccept: listing.autoAccept
+                        }))
                         window.location.href = '/seller'
                       }}
                     />
                   ))}
                   {listings.length > 2 && (
-                    <Button variant="ghost" size="sm" className="w-full text-xs">
-                      View all {listings.length} listings
-                    </Button>
+                    <div className="text-center pt-2">
+                      <Link href="/seller">
+                        <Button variant="outline" size="sm">
+                          View All {listings.length} Listings
+                        </Button>
+                      </Link>
+                    </div>
                   )}
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <Package className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-3">No listings yet</p>
-                  <Link href="/seller">
-                    <Button size="sm" className="w-full">
-                      <Plus className="w-4 h-4 mr-1" />
-                      Create First Listing
-                    </Button>
-                  </Link>
                 </div>
               )}
             </DashboardCard>
 
             {/* Requests to You Card */}
-            <DashboardCard
-              title="Requests 🎒"
+            <DashboardCard 
+              title="Requests 🔔" 
               description="Incoming booking requests"
-              icon={<Users className="w-5 h-5 text-green-600" />}
+              isEmpty={requests.length === 0}
+              emptyMessage="No pending requests"
             >
-              {requests.length > 0 ? (
+              {requests.length > 0 && (
                 <div className="space-y-3">
                   {requests.slice(0, 2).map((request) => (
                     <RequestCard
                       key={request.id}
-                      buyerName="John Traveler"
-                      flight={{
-                        flightNo: "AA123",
-                        date: new Date("2024-12-25")
+                      request={request}
+                      onAccept={() => {
+                        window.location.href = `/matches/${request.id}`
                       }}
-                      requestedKg={request.quantityKg}
-                      offeredPrice={request.totalCents}
-                      timeAgo="2h ago"
-                      isVerified={true}
-                      onAccept={() => {}}
-                      onDecline={() => {}}
+                      onDecline={() => {
+                        // Handle decline logic
+                      }}
                     />
                   ))}
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <Users className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground">No pending requests</p>
                 </div>
               )}
             </DashboardCard>
 
             {/* Available on Your Flights Card */}
-            <DashboardCard
-              title="Available on Your Flights 🔍"
+            <DashboardCard 
+              title="Available on Your Flights 🔍" 
               description="Find space on your upcoming trips"
-              icon={<Plane className="w-5 h-5 text-purple-600" />}
+              isEmpty={availableOnFlights.length === 0}
+              emptyMessage="No available listings on your flights"
             >
-              {availableOnFlights.length > 0 ? (
+              {availableOnFlights.length > 0 && (
                 <div className="space-y-3">
                   {availableOnFlights.slice(0, 2).map((listing) => (
                     <AvailableListingCard
                       key={listing.id}
-                      flight={listing.flight || {
-                        flightNo: "TBD",
-                        date: new Date(),
-                        airline: "TBD"
-                      }}
-                      sellerName="Space Provider"
-                      weightKg={listing.weightKg}
-                      pricePerKg={listing.pricePerKg}
-                      isVerified={true}
-                      trustScore={4.9}
-                      matchHistory={12}
+                      listing={listing}
                       onBook={() => {
+                        window.location.href = `/match/${listing.id}`
+                      }}
+                      onViewDetails={() => {
                         window.location.href = `/match/${listing.id}`
                       }}
                     />
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-4">
-                  <Plane className="w-8 h-8 mx-auto text-muted-foreground mb-2" />
-                  <p className="text-sm text-muted-foreground mb-3">No available space on your flights</p>
-                  <Link href="/buyer">
-                    <Button size="sm" variant="outline" className="w-full">
-                      Browse All Listings
-                    </Button>
-                  </Link>
-                </div>
               )}
             </DashboardCard>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
-              <Link href="/seller">
-                <Button className="w-full h-12 text-sm">
-                  <Plus className="w-4 h-4 mr-1" />
+            <div className="flex gap-4 pt-4">
+              <Link href="/seller" className="flex-1">
+                <Button className="w-full" size="lg">
+                  <Plus className="w-4 h-4 mr-2" />
                   List Space
                 </Button>
               </Link>
-              <Link href="/buyer">
-                <Button variant="outline" className="w-full h-12 text-sm">
-                  <Package className="w-4 h-4 mr-1" />
+              <Link href="/buyer" className="flex-1">
+                <Button variant="outline" className="w-full" size="lg">
+                  <Search className="w-4 h-4 mr-2" />
                   Find Space
                 </Button>
               </Link>
             </div>
 
             {/* Bottom Navigation Hint */}
-            <div className="text-center pt-4 pb-8">
-              <Link href="/matches" className="text-xs text-muted-foreground hover:text-foreground">
-                View all bookings & matches →
-              </Link>
+            <div className="text-center pt-6 pb-4">
+              <p className="text-xs text-muted-foreground">
+                💡 Tip: Create listings for upcoming flights to earn extra money
+              </p>
             </div>
-        </div>
+          </div>
         )}
       </main>
     </div>
