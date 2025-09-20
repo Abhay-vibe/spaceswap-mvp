@@ -121,30 +121,40 @@ export class FraudService {
    * Update user trust metrics after successful match
    */
   static async updateUserMetrics(userId: string, incrementMatches: boolean = true, incrementFlights: boolean = false): Promise<void> {
-    const { data: user } = await supabaseAdmin
-      .from('auth.users')
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
       .select('*')
       .eq('id', userId)
       .single()
     
-    if (!user) return
+    if (!profile) return
     
-    const updates: Partial<User> = {}
+    const updates: any = {}
     
     if (incrementMatches) {
-      updates.match_history_count = (user.match_history_count || 0) + 1
+      updates.match_history_count = (profile.match_history_count || 0) + 1
     }
     
     if (incrementFlights) {
-      updates.past_flights_count = (user.past_flights_count || 0) + 1
+      updates.past_flights_count = (profile.past_flights_count || 0) + 1
     }
     
     // Recalculate trust score
-    const updatedUser = { ...user, ...updates }
-    updates.trust_score = this.calculateTrustScore(updatedUser as User)
+    const updatedProfile = { ...profile, ...updates }
+    updates.trust_score = this.calculateTrustScore({
+      id: updatedProfile.id,
+      email: updatedProfile.email,
+      full_name: updatedProfile.full_name,
+      phone: updatedProfile.phone,
+      verified: updatedProfile.verified,
+      match_history_count: updatedProfile.match_history_count,
+      past_flights_count: updatedProfile.past_flights_count,
+      trust_score: updatedProfile.trust_score,
+      created_at: updatedProfile.created_at
+    })
     
     await supabaseAdmin
-      .from('auth.users')
+      .from('profiles')
       .update(updates)
       .eq('id', userId)
   }
