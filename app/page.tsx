@@ -191,14 +191,6 @@ export default function HomePage() {
               </Card>
             ))}
           </div>
-        ) : (
-          <div className="space-y-2 mb-4 p-2 bg-blue-50 rounded text-xs">
-            <p>Debug Info:</p>
-            <p>User: {user?.name || user?.email}</p>
-            <p>Listings: {listings.length}</p>
-            <p>Requests: {requests.length}</p>
-            <p>Available: {availableOnFlights.length}</p>
-          </div>
         )}
         {!loading && (
           <div className="space-y-6">
