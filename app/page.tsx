@@ -8,7 +8,7 @@ import { DashboardCard, ListingCard, RequestCard, AvailableListingCard } from "@
 import { Plane, Package, Shield, Users, Plus, Search } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { mockDb } from "@/lib/mock-db"
+import SupabaseService from "@/lib/supabase-service"
 import type { Listing, Match, User as UserType } from "@/lib/types"
 import { MatchStatus } from "@/lib/types"
 
@@ -29,30 +29,30 @@ export default function HomePage() {
   const loadDashboardData = async () => {
     try {
       // Ensure demo data exists
-      await mockDb.seedData()
+      await SupabaseService.seedData()
       
       // Load user's listings with flight data
-      const userListings = await mockDb.getListingsByUser(user!.id) || []
+      const userListings = await SupabaseService.getListingsByUser(user!.id) || []
       console.log('User listings:', userListings)
       const listingsWithFlights = await Promise.all(
         userListings.map(async (listing) => {
-          const flight = await mockDb.getFlightById(listing.flightId)
+          const flight = await SupabaseService.getFlightById(listing.flightId)
           return { ...listing, flight }
         })
       )
       setListings(listingsWithFlights)
 
       // Load incoming requests (for seller)
-      const incomingRequests = await mockDb.getRequestsForUser(user!.id) || []
+      const incomingRequests = await SupabaseService.getRequestsForUser(user!.id) || []
       console.log('Incoming requests:', incomingRequests)
       setRequests(incomingRequests)
 
       // Load available listings on user's flights (for buyer) with flight data
-      const availableListings = await mockDb.getAvailableListingsForUser(user!.id) || []
+      const availableListings = await SupabaseService.getAvailableListingsForUser(user!.id) || []
       console.log('Available listings:', availableListings)
       const availableWithFlights = await Promise.all(
         availableListings.map(async (listing) => {
-          const flight = await mockDb.getFlightById(listing.flightId)
+          const flight = await SupabaseService.getFlightById(listing.flightId)
           return { ...listing, flight }
         })
       )

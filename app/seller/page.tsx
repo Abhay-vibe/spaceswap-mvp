@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch"
 import { ArrowLeft, Plane, CheckCircle, Package, Users, Edit, Eye } from "lucide-react"
 import Link from "next/link"
-import { mockDb } from "@/lib/mock-db"
+import SupabaseService from "@/lib/supabase-service"
 import { formatCurrency } from "@/lib/currency"
 import { UserInfoForm } from "@/components/user-info-form"
 
@@ -58,8 +58,8 @@ export default function SellerPage() {
   const handleUserInfoSubmit = async (userInfo: { name: string; email: string; phone: string }) => {
     setLoading(true)
     try {
-      // Create user in mock database
-      const newUser = await mockDb.createUser({
+      // Create user in Supabase
+      const newUser = await SupabaseService.createUser({
         email: userInfo.email,
         name: userInfo.name,
         phone: userInfo.phone,
@@ -80,14 +80,14 @@ export default function SellerPage() {
     setLoading(true)
     try {
       // Create or find flight
-      const flight = await mockDb.findOrCreateFlight(
+      const flight = await SupabaseService.findOrCreateFlight(
         formData.flightNo.toUpperCase(),
         new Date(formData.flightDate),
         formData.airline || undefined,
       )
 
       // Create listing
-      const listing = await mockDb.createListing({
+      const listing = await SupabaseService.createListing({
         sellerId: user.id,
         flightId: flight.id,
         weightKg: Number.parseInt(formData.weightKg),
