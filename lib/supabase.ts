@@ -1,19 +1,27 @@
 import { createClient } from '@supabase/supabase-js'
+import { getSupabaseConfig } from './env-config'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!
+const config = getSupabaseConfig()
 
 // Client for frontend operations (with RLS)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+  auth: {
+    // Only persist session if properly configured
+    persistSession: config.isConfigured,
+    autoRefreshToken: config.isConfigured
+  }
+})
 
 // Admin client for backend operations (bypasses RLS)
-export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+export const supabaseAdmin = createClient(config.supabaseUrl, config.supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
   }
 })
+
+// Export configuration status for components to check
+export const isSupabaseConfigured = config.isConfigured
 
 // Database types
 export interface User {

@@ -58,7 +58,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           await syncUserProfile(session.user)
         } else if (event === 'SIGNED_OUT') {
           setUser(null)
-          localStorage.removeItem('spaceswap_user')
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('spaceswap_user')
+          }
         }
       }
     )
@@ -109,7 +111,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       setUser(userProfile)
-      localStorage.setItem('spaceswap_user', JSON.stringify(userProfile))
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('spaceswap_user', JSON.stringify(userProfile))
+      }
     } catch (error) {
       console.error('Failed to sync user profile:', error)
     }
@@ -166,10 +170,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const persistUser = (user: User | null) => {
-    if (user) {
-      localStorage.setItem('spaceswap_user', JSON.stringify(user))
-    } else {
-      localStorage.removeItem('spaceswap_user')
+    if (typeof window !== 'undefined') {
+      if (user) {
+        localStorage.setItem('spaceswap_user', JSON.stringify(user))
+      } else {
+        localStorage.removeItem('spaceswap_user')
+      }
     }
     setUser(user)
   }

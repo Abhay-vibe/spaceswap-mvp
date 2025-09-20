@@ -14,13 +14,15 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        console.log('Starting auth callback process...')
+        
         // Get the session from the URL hash
         const { data: { session }, error: sessionError } = await supabase.auth.getSession()
         
         if (sessionError) {
           console.error('Session error:', sessionError)
           setStatus('error')
-          setMessage('Failed to authenticate. Please try again.')
+          setMessage(`Authentication failed: ${sessionError.message}`)
           return
         }
 
@@ -31,47 +33,84 @@ export default function AuthCallbackPage() {
           return
         }
 
-        console.log('Auth callback - User:', session.user)
+        console.log('Auth callback - User found:', session.user.email)
 
-        // Sync user profile data
-        const syncResponse = await fetch('/api/auth/sync', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`
-          },
-          body: JSON.stringify({
-            user: session.user
-          })
-        })
+        // Sync user profile data with retry logic
+        let syncAttempts = 0
+        const maxAttempts = 3
+        let syncSuccess = false
 
-        if (!syncResponse.ok) {
-          const errorData = await syncResponse.json()
-          console.error('Profile sync failed:', errorData)
-          setStatus('error')
-          setMessage(errorData.error || 'Failed to sync profile data.')
-          return
+        while (syncAttempts < maxAttempts && !syncSuccess) {
+          try {
+            console.log(`Profile sync attempt ${syncAttempts + 1}/${maxAttempts}`)
+            
+            const syncResponse = await fetch('/api/auth/sync', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${session.access_token}`
+              },
+              body: JSON.stringify({
+                user: session.user
+              })
+            })
+
+            if (syncResponse.ok) {
+              const syncData = await syncResponse.json()
+              console.log('Profile synced successfully:', syncData)
+              syncSuccess = true
+            } else {
+              const errorData = await syncResponse.json().catch(() => ({ error: 'Unknown sync error' }))
+              console.error(`Profile sync attempt ${syncAttempts + 1} failed:`, errorData)
+              
+              if (syncAttempts === maxAttempts - 1) {
+                // Last attempt failed
+                setStatus('error')
+                setMessage(`Profile sync failed: ${errorData.error || 'Unknown error'}. You may need to sign in again.`)
+                return
+              }
+            }
+          } catch (fetchError) {
+            console.error(`Profile sync attempt ${syncAttempts + 1} network error:`, fetchError)
+            
+            if (syncAttempts === maxAttempts - 1) {
+              setStatus('error')
+              setMessage('Network error during profile sync. Please check your connection and try again.')
+              return
+            }
+          }
+          
+          syncAttempts++
+          
+          // Wait before retry (exponential backoff)
+          if (!syncSuccess && syncAttempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 1000 * syncAttempts))
+          }
         }
 
-        const syncData = await syncResponse.json()
-        console.log('Profile synced successfully:', syncData)
+        if (syncSuccess) {
+          setStatus('success')
+          setMessage('Successfully authenticated! Redirecting to dashboard...')
 
-        setStatus('success')
-        setMessage('Successfully authenticated! Redirecting...')
-
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          router.push('/')
-        }, 2000)
+          // Redirect to dashboard after a short delay
+          setTimeout(() => {
+            if (typeof window !== 'undefined') {
+              router.push('/')
+            }
+          }, 2000)
+        }
 
       } catch (error) {
         console.error('Auth callback error:', error)
         setStatus('error')
-        setMessage('An unexpected error occurred during authentication.')
+        setMessage(`Unexpected error: ${error instanceof Error ? error.message : 'Unknown error'}`)
       }
     }
 
-    handleAuthCallback()
+    // Add a small delay to ensure DOM is ready
+    const timeoutId = setTimeout(handleAuthCallback, 100)
+    
+    return () => clearTimeout(timeoutId)
   }, [router])
 
   const getIcon = () => {
@@ -121,7 +160,11 @@ export default function AuthCallbackPage() {
                 Return to Home
               </button>
               <button
-                onClick={() => window.location.reload()}
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.location.reload()
+                  }
+                }}
                 className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Try Again
