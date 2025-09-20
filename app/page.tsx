@@ -157,15 +157,15 @@ export default function HomePage() {
       <header className="border-b bg-white">
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Plane className="w-6 h-6 text-blue-600" />
+            <div className="flex items-center gap-2">
+              <Plane className="w-6 h-6 text-blue-600" />
               <h1 className="text-lg font-bold">SpaceSwap</h1>
             </div>
             <div className="flex items-center gap-2">
               <div className="hidden sm:flex items-center gap-1">
                 <Shield className="w-4 h-4 text-green-600" />
                 <span className="text-xs text-muted-foreground">Verified</span>
-          </div>
+              </div>
               <Button variant="ghost" size="sm" onClick={logout} className="text-xs">
                 Sign out
               </Button>
