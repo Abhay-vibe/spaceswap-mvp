@@ -5,6 +5,7 @@ import { LoginForm } from "@/components/login-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { DashboardCard, ListingCard, RequestCard, AvailableListingCard } from "@/components/dashboard-card"
+import { ConfigDiagnostic } from "@/components/config-diagnostic"
 import { Plane, Package, Shield, Users, Plus, Search } from "lucide-react"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -130,6 +131,11 @@ export default function HomePage() {
 
           <div className="max-w-md mx-auto">
             <LoginForm />
+          </div>
+
+          {/* Configuration Diagnostic - Temporary for debugging */}
+          <div className="mt-8 max-w-4xl mx-auto">
+            <ConfigDiagnostic />
           </div>
 
           <div className="mt-8 sm:mt-12 text-center">
