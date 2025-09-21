@@ -29,10 +29,10 @@ The production app is using placeholder Supabase URLs (`placeholder.supabase.co`
 1. **Go to Vercel Dashboard** → Your Project → Settings → Environment Variables
 2. **Add/Update these variables**:
    ```bash
-   NEXT_PUBLIC_SUPABASE_URL=https://[your-project-id].supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.[your-anon-key]
+   NEXT_PUBLIC_SUPABASE_URL=https://xpbwtvldqksiwzgusrra.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhwYnd0dmxkcWtzaXd6Z3VzcnJhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwNzg2NjgsImV4cCI6MjA3MzY1NDY2OH0.EMppsSURIe58tdNalzUEC_lHwbTzztQqUDKfbQkY8b4
    SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.[your-service-key]
-   NEXT_PUBLIC_APP_URL=https://[your-vercel-app].vercel.app
+   NEXT_PUBLIC_APP_URL=https://spaceswap-fpaonzmzd-abhays-projects-a72cd374.vercel.app/
    ```
 3. **Set Environment**: Production, Preview, Development (all)
 4. **Click "Save"**
@@ -40,7 +40,7 @@ The production app is using placeholder Supabase URLs (`placeholder.supabase.co`
 ### **Step 3: Configure Supabase Authentication**
 
 1. **In Supabase Dashboard** → Authentication → Settings
-2. **Site URL**: Set to `https://[your-vercel-app].vercel.app`
+2. **Site URL**: Set to `https://spaceswap-fpaonzmzd-abhays-projects-a72cd374.vercel.app/`
 3. **Redirect URLs**: Add these URLs:
    ```
    https://[your-vercel-app].vercel.app/auth/callback
