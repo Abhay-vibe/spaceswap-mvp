@@ -1,19 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
 
-// Force this route to be dynamic since it uses request headers for auth
+// Force this route to be dynamic 
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: NextRequest) {
   try {
-    // Simple admin auth check - in production, implement proper admin authentication
-    const adminKey = request.headers.get('x-admin-key')
-    if (!adminKey || adminKey !== process.env.ADMIN_API_KEY) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
+    // Note: No authentication required for demo purposes
+    // In production, implement proper admin authentication
 
     // Get total users count
     const { count: totalUsers } = await supabaseAdmin

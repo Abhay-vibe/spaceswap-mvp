@@ -33,7 +33,6 @@ export const getAppConfig = () => {
   
   return {
     appUrl,
-    adminApiKey: process.env.ADMIN_API_KEY || 'placeholder-admin-key',
     isDevelopment: process.env.NODE_ENV === 'development',
     isProduction: process.env.NODE_ENV === 'production'
   }

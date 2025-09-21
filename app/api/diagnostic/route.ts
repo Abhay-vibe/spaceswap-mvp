@@ -36,13 +36,6 @@ export async function GET(request: NextRequest) {
       },
       
       // App variables
-      ADMIN_API_KEY: {
-        value: process.env.ADMIN_API_KEY ? 
-               `${process.env.ADMIN_API_KEY.substring(0, 10)}...` : null,
-        present: Boolean(process.env.ADMIN_API_KEY),
-        isPlaceholder: process.env.ADMIN_API_KEY?.includes('placeholder') || false,
-        length: process.env.ADMIN_API_KEY?.length || 0
-      },
       NEXT_PUBLIC_APP_URL: {
         value: process.env.NEXT_PUBLIC_APP_URL || null,
         present: Boolean(process.env.NEXT_PUBLIC_APP_URL),
