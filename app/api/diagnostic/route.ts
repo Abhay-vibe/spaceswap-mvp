@@ -51,11 +51,15 @@ export async function GET(request: NextRequest) {
       },
       configuration: {
         supabaseUrl: supabaseConfig.supabaseUrl,
+        supabaseUrlMasked: supabaseConfig.supabaseUrl.replace(/https:\/\/([a-z0-9]+)/, 'https://***$1***'),
+        isPlaceholderUrl: supabaseConfig.supabaseUrl.includes('your-project') || supabaseConfig.supabaseUrl.includes('placeholder'),
         supabaseConfigured: supabaseConfig.isConfigured,
         appUrl: appConfig.appUrl,
         hasAnonKey: Boolean(process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
         hasServiceKey: Boolean(process.env.SUPABASE_SERVICE_KEY),
-        hasGoogleClientId: Boolean(process.env.GOOGLE_CLIENT_ID)
+        hasGoogleClientId: Boolean(process.env.GOOGLE_CLIENT_ID),
+        anonKeyPrefix: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.substring(0, 20) + '...',
+        serviceKeyPrefix: process.env.SUPABASE_SERVICE_KEY?.substring(0, 20) + '...'
       },
       recommendations: []
     }
