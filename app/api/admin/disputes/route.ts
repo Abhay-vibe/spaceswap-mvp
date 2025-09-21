@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import StripeService from '@/lib/stripe-service'
 
 // Force this route to be dynamic since it uses request headers for auth
 export const dynamic = 'force-dynamic'
@@ -114,21 +113,13 @@ export async function POST(request: NextRequest) {
 
     try {
       if (resolution === 'refund') {
-        // Cancel/refund the PaymentIntent
-        if (match.stripe_payment_intent) {
-          await StripeService.cancelPaymentIntent(match.stripe_payment_intent)
-          paymentAction = 'refunded'
-        }
+        paymentAction = 'refunded'
         newStatus = 'CANCELLED'
       } else if (resolution === 'release') {
-        // Capture the PaymentIntent (release to seller)
-        if (match.stripe_payment_intent) {
-          await StripeService.capturePaymentIntent(match.stripe_payment_intent)
-          paymentAction = 'released'
-        }
+        paymentAction = 'released'
         newStatus = 'RELEASED'
       }
-      // For 'partial', would need custom Stripe logic - not implemented in MVP
+      // For 'partial', would need custom payment logic - not implemented in MVP
 
       // Update match status
       const { data: updatedMatch, error: updateError } = await supabaseAdmin
@@ -160,13 +151,13 @@ export async function POST(request: NextRequest) {
         match: updatedMatch,
         resolution,
         paymentAction,
-        message: `Dispute resolved: ${resolution}`
+        message: `Dispute resolved: ${resolution}. Payment will be handled separately.`
       })
 
-    } catch (stripeError) {
-      console.error('Stripe error during dispute resolution:', stripeError)
+    } catch (error) {
+      console.error('Error during dispute resolution:', error)
       return NextResponse.json(
-        { error: 'Payment processing failed during dispute resolution' },
+        { error: 'Dispute resolution failed' },
         { status: 500 }
       )
     }

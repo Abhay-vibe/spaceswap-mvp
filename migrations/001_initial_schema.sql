@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS matches (
   buyer uuid REFERENCES auth.users(id) ON DELETE CASCADE,
   quantity_kg int NOT NULL CHECK (quantity_kg > 0),
   total_amount int NOT NULL CHECK (total_amount > 0), -- in paise
-  stripe_payment_intent text,
+  booking_reference text,
   status text DEFAULT 'PENDING' CHECK (status IN ('PENDING', 'ACCEPTED', 'CONFIRMED', 'RELEASED', 'DISPUTED', 'CANCELLED')),
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin, Match } from '@/lib/supabase'
-import StripeService from '@/lib/stripe-service'
 import FraudService from '@/lib/fraud-service'
 
 export async function POST(request: NextRequest) {
@@ -82,14 +81,8 @@ export async function POST(request: NextRequest) {
     // Calculate total amount
     const totalAmount = listing.price_per_kg * quantityKg
 
-    // Create Stripe PaymentIntent
-    const paymentIntent = await StripeService.createPaymentIntent({
-      amount: totalAmount,
-      currency: 'inr',
-      matchId: 'temp', // Will update after match creation
-      buyerId: userId,
-      sellerId: listing.seller
-    })
+    // Generate a booking reference
+    const bookingReference = `BK_${Math.random().toString(36).substr(2, 9).toUpperCase()}`
 
     // Create match record
     const { data: match, error: matchError } = await supabaseAdmin
@@ -99,7 +92,7 @@ export async function POST(request: NextRequest) {
         buyer: userId,
         quantity_kg: quantityKg,
         total_amount: totalAmount,
-        stripe_payment_intent: paymentIntent.id,
+        booking_reference: bookingReference,
         status: 'PENDING'
       })
       .select(`
@@ -110,28 +103,16 @@ export async function POST(request: NextRequest) {
       .single()
 
     if (matchError) {
-      // Cancel the PaymentIntent if match creation failed
-      await StripeService.cancelPaymentIntent(paymentIntent.id)
-      
       return NextResponse.json(
         { error: 'Failed to create match', details: matchError.message },
         { status: 500 }
       )
     }
 
-    // Update PaymentIntent metadata with actual match ID
-    await StripeService.createPaymentIntent({
-      amount: totalAmount,
-      currency: 'inr',
-      matchId: match.id,
-      buyerId: userId,
-      sellerId: listing.seller
-    })
-
-    // Return match details with payment client secret
+    // Return match details
     return NextResponse.json({
       match,
-      paymentClientSecret: paymentIntent.client_secret,
+      bookingReference,
       fraudCheck: {
         trustScore: fraudCheck.trustScore,
         flags: fraudCheck.flags

@@ -11,7 +11,6 @@ interface DiagnosticData {
   configurationStatus: {
     overall: boolean
     supabaseConfigured: boolean
-    stripeConfigured: boolean
     issues: string[]
     failureReasons: string[]
   }

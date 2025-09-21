@@ -85,17 +85,6 @@ export function ConfigStatusBanner() {
                 </span>
               </div>
 
-              {/* Stripe Status */}
-              <div className="flex items-center gap-2">
-                {configStatus.config.stripe.isConfigured ? (
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                ) : (
-                  <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                )}
-                <span className="text-xs">
-                  Stripe: {configStatus.config.stripe.isConfigured ? 'Configured' : 'Missing'}
-                </span>
-              </div>
 
               {/* Environment */}
               <div className="flex items-center gap-2">
@@ -165,7 +154,6 @@ export function ConfigErrorFallback() {
             <h4 className="font-semibold text-sm mb-2">Missing Configuration:</h4>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Supabase URL and API keys</li>
-              <li>• Stripe payment configuration</li>
               <li>• Google OAuth credentials</li>
             </ul>
           </div>

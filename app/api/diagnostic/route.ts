@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseConfig, getStripeConfig, getAppConfig, validateEnvironment } from '@/lib/env-config'
+import { getSupabaseConfig, getAppConfig, validateEnvironment } from '@/lib/env-config'
 
 export async function GET(request: NextRequest) {
   try {
     // Get all configuration details
     const supabaseConfig = getSupabaseConfig()
-    const stripeConfig = getStripeConfig()
     const appConfig = getAppConfig()
     const validation = validateEnvironment()
 
@@ -36,22 +35,6 @@ export async function GET(request: NextRequest) {
         startsWithEyJ: process.env.SUPABASE_SERVICE_KEY?.startsWith('eyJ') || false
       },
       
-      // Stripe variables
-      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: {
-        value: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? 
-               `${process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.substring(0, 20)}...` : null,
-        present: Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY),
-        isPlaceholder: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.includes('placeholder') || false,
-        length: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.length || 0
-      },
-      STRIPE_SECRET_KEY: {
-        value: process.env.STRIPE_SECRET_KEY ? 
-               `${process.env.STRIPE_SECRET_KEY.substring(0, 20)}...` : null,
-        present: Boolean(process.env.STRIPE_SECRET_KEY),
-        isPlaceholder: process.env.STRIPE_SECRET_KEY?.includes('placeholder') || false,
-        length: process.env.STRIPE_SECRET_KEY?.length || 0
-      },
-      
       // App variables
       ADMIN_API_KEY: {
         value: process.env.ADMIN_API_KEY ? 
@@ -78,11 +61,6 @@ export async function GET(request: NextRequest) {
         urlIsPlaceholder: supabaseConfig.supabaseUrl === 'https://placeholder.supabase.co',
         anonKeyIsPlaceholder: supabaseConfig.supabaseAnonKey === 'placeholder-anon-key',
         serviceKeyIsPlaceholder: supabaseConfig.supabaseServiceKey === 'placeholder-service-key'
-      },
-      stripe: {
-        isConfigured: stripeConfig.isConfigured,
-        hasPublishableKey: Boolean(stripeConfig.publishableKey && stripeConfig.publishableKey !== 'pk_test_placeholder'),
-        hasSecretKey: Boolean(stripeConfig.secretKey && stripeConfig.secretKey !== 'sk_test_placeholder')
       },
       app: {
         environment: process.env.NODE_ENV,
@@ -122,7 +100,6 @@ export async function GET(request: NextRequest) {
       configurationStatus: {
         overall: validation.isValid,
         supabaseConfigured: supabaseConfig.isConfigured,
-        stripeConfigured: stripeConfig.isConfigured,
         issues: validation.issues,
         failureReasons
       },

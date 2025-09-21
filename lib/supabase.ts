@@ -77,7 +77,7 @@ export interface Match {
   buyer: string
   quantity_kg: number
   total_amount: number
-  stripe_payment_intent?: string
+  booking_reference?: string
   status: 'PENDING' | 'ACCEPTED' | 'CONFIRMED' | 'RELEASED' | 'DISPUTED' | 'CANCELLED'
   created_at: string
   // Joined data

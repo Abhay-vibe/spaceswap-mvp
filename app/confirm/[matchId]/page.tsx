@@ -9,7 +9,6 @@ import { ArrowLeft, Users } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { mockDb } from "@/lib/mock-db"
-import { mockEscrow } from "@/lib/stripe-mock"
 import type { Match, Listing } from "@/lib/types"
 import { MatchStatus } from "@/lib/types"
 
@@ -91,9 +90,8 @@ export default function ConfirmPage({ params }: ConfirmPageProps) {
       if (updatedMatch) {
         setMatch(updatedMatch)
 
-        // Release escrow payment
-        const escrowResult = await mockEscrow.releasePayment("mock_escrow_id", listing?.sellerId || "")
-        console.log("[v0] Escrow released:", escrowResult)
+        // Log confirmation (no payment processing needed)
+        console.log("[v0] Transfer confirmed for match:", match.id)
 
         // Redirect to success page
         router.push(`/matches/${match.id}`)

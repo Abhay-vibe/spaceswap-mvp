@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
-import StripeService from '@/lib/stripe-service'
 import FraudService from '@/lib/fraud-service'
 
 interface RouteParams {
@@ -67,19 +66,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     // In production, you might want to track separate confirmations
     
     try {
-      // Capture the PaymentIntent (release funds from escrow)
-      if (match.stripe_payment_intent) {
-        const capturedPayment = await StripeService.capturePaymentIntent(match.stripe_payment_intent)
-        
-        if (capturedPayment.status !== 'succeeded') {
-          return NextResponse.json(
-            { error: 'Payment capture failed', details: capturedPayment.status },
-            { status: 500 }
-          )
-        }
-      }
-
-      // Update match status to RELEASED
+      // Update match status to RELEASED (no payment processing needed)
       const { data: updatedMatch, error: updateError } = await supabaseAdmin
         .from('matches')
         .update({ status: 'RELEASED' })
@@ -110,29 +97,29 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
 
       // Optionally update flight count if this was their first flight
       if (match.buyer_data.past_flights_count === 0) {
-        await FraudService.updateUserMetrics(match.buyer, false, true)
+        FraudService.updateUserMetrics(match.buyer, false, true)
       }
 
       return NextResponse.json({
         match: updatedMatch,
         payment: {
-          status: 'captured',
+          status: 'confirmed',
           amount: match.total_amount
         },
-        message: 'Match confirmed successfully. Payment released to seller.'
+        message: 'Match confirmed successfully. Payment will be handled at the airport.'
       })
 
-    } catch (stripeError) {
-      console.error('Stripe capture error:', stripeError)
+    } catch (error) {
+      console.error('Match confirmation error:', error)
       
-      // If payment capture fails, we might want to set status to DISPUTED
+      // If confirmation fails, set status to DISPUTED
       await supabaseAdmin
         .from('matches')
         .update({ status: 'DISPUTED' })
         .eq('id', matchId)
 
       return NextResponse.json(
-        { error: 'Payment processing failed. Match marked for manual review.' },
+        { error: 'Match confirmation failed. Marked for manual review.' },
         { status: 500 }
       )
     }
